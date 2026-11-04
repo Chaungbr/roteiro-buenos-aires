@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E2A47">
+<title>Roteiro Buenos Aires</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: app de uma coluna para celular — mapa fixo no topo de cada dia, cartões numerados abaixo, barra de dias embaixo. */
+:root{
+  --bg:#F4F7FB; --surface:#FFFFFF; --ink:#0E2A47; --muted:#5B6B80; --line:#DCE4EE;
+  --celeste:#4C9ED9; --celeste-soft:#E3F0FA; --sol:#F2A900; --sol-soft:#FFF3D6;
+  --ok:#2E8B57; --ok-soft:#E2F3EA;
+  --display:"DM Serif Display", Georgia, "Times New Roman", serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --nav-h:64px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1624; --surface:#122236; --ink:#E8EFF7; --muted:#9AAABD; --line:#22364D;
+    --celeste:#74B6E6; --celeste-soft:#16324A; --sol:#F6BE3A; --sol-soft:#3A2E10;
+    --ok:#5CC48A; --ok-soft:#163626; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1624; --surface:#122236; --ink:#E8EFF7; --muted:#9AAABD; --line:#22364D;
+  --celeste:#74B6E6; --celeste-soft:#16324A; --sol:#F6BE3A; --sol-soft:#3A2E10;
+  --ok:#5CC48A; --ok-soft:#163626; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px))}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--celeste);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- capa ---------- */
+.hero{background:var(--ink);color:#fff;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+:root[data-theme="dark"] .hero{background:#081320}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hero{background:#081320}}
+.hero .wrap{padding-block:40px 32px;position:relative}
+.sun{position:absolute;right:-70px;top:-70px;width:200px;height:200px;opacity:.95}
+.hero .eyebrow{max-width:22ch}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#BFD9EE}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,13vw,72px);line-height:.95;margin:10px 0 8px;text-wrap:balance}
+.hero h1 em{color:var(--sol);font-style:italic}
+.hero p{margin:0;color:#D5E3F0;max-width:34ch}
+.stripe{height:8px;background:linear-gradient(90deg,#74ACDF 0 33.3%,#fff 33.3% 66.6%,#74ACDF 66.6%)}
+
+.daylist{display:grid;gap:10px;margin:20px 0 8px}
+.daylink{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none}
+.daylink .num{font-family:var(--display);font-size:30px;line-height:1;color:var(--celeste)}
+.daylink b{display:block;font-weight:700}
+.daylink small{color:var(--muted);font-size:13px}
+.daylink .prog{font-size:12px;font-weight:600;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.daylink .prog.done{color:var(--ok)}
+.sec-title{font-family:var(--display);font-weight:400;font-size:26px;margin:28px 0 4px}
+.sec-sub{color:var(--muted);margin:0 0 12px;font-size:14px}
+
+.mapbox{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--celeste-soft)}
+.mapbox iframe{display:block;width:100%;height:100%;border:0}
+.mapbox.big{height:min(62vh,460px)}
+.mapbox .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:14px;pointer-events:none}
+.mapbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;min-height:40px}
+.btn.primary{background:var(--celeste);border-color:var(--celeste);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#06121F}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#06121F}}
+.btn svg{width:16px;height:16px;flex:none}
+
+/* ---------- dia ---------- */
+.dayhead{background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.dayhead .wrap{padding-block:16px 14px}
+.dayhead .eyebrow{color:var(--celeste)}
+.dayhead h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,8.5vw,40px);line-height:1.05;margin:4px 0 2px;text-wrap:balance}
+.dayhead p{margin:0;color:var(--muted);font-size:15px}
+.progress{height:6px;border-radius:6px;background:var(--line);margin-top:12px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progtxt{font-size:12px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+
+.daymap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
+.daymap .mapbox{height:34vh;min-height:220px;max-height:340px}
+.maplabel{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.maplabel::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--celeste);flex:none}
+.daymap .mapbar{margin-top:8px}
+.daymap .mapbar .btn{padding:6px 12px;min-height:36px;font-size:13px}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.period{display:flex;align-items:center;gap:10px;margin:22px 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.period::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.stops{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:40px 1fr;gap:12px;scroll-margin-top:calc(34vh + 120px);transition:border-color .2s,box-shadow .2s}
+.card.active{border-color:var(--celeste);box-shadow:0 0 0 3px var(--celeste-soft)}
+.card.isdone{opacity:.72}
+.pin{width:36px;height:36px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--celeste);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;border:0;cursor:pointer;padding:0}
+.pin span{transform:rotate(45deg);font-variant-numeric:tabular-nums}
+.pin.food{background:var(--sol);color:#2A1E00}
+.pin.rest{background:var(--muted)}
+.card.isdone .pin{background:var(--ok)}
+.card .body{min-width:0}
+.card h3{margin:0;font-size:17px;line-height:1.25;font-weight:700}
+.card .addr{color:var(--muted);font-size:13px;margin-top:2px}
+.card p{margin:8px 0 0;font-size:15px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:3px 7px;background:var(--celeste-soft);color:var(--ink)}
+.tag.free{background:var(--ok-soft);color:var(--ok)}
+.tag.time{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tag.meal{background:var(--sol-soft)}
+.sights{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sights span{font-size:13px;border:1px dashed var(--line);border-radius:6px;padding:2px 8px}
+.tip{margin-top:10px;background:var(--sol-soft);border-radius:10px;padding:8px 10px;font-size:14px}
+.tip b{font-weight:700}
+.near{margin-top:8px;font-size:13px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.facts div{border-top:1px solid var(--line);padding-top:6px;font-size:13px}
+.facts small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.actions .btn{padding:6px 12px;min-height:38px;font-size:13px}
+.done-btn[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+
+.note{background:var(--celeste-soft);border-radius:16px;padding:14px;display:grid;gap:4px}
+.note .eyebrow{color:var(--celeste)}
+.note h3{margin:0;font-size:16px}
+.note p{margin:0;font-size:14px}
+.note .actions{margin-top:8px}
+
+.transit{display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:14px}
+.transit svg{width:20px;height:20px;flex:none;color:var(--celeste)}
+
+.empty{border:1px dashed var(--line);border-radius:16px;padding:16px;color:var(--muted);font-size:14px;text-align:center}
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:32px 0 24px}
+.daynext{display:flex;justify-content:space-between;gap:8px;margin-top:24px}
+
+/* ---------- barra inferior ---------- */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs ul{list-style:none;margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(5,1fr);max-width:640px;height:var(--nav-h)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:100%;text-decoration:none;font-size:11px;font-weight:600;color:var(--muted)}
+nav.tabs a b{font-family:var(--display);font-weight:400;font-size:20px;line-height:1}
+nav.tabs a svg{width:22px;height:22px}
+nav.tabs a[aria-current="page"]{color:var(--celeste)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<main id="app"></main>
+
+<nav class="tabs" aria-label="Dias da viagem"><ul id="tabs"></ul></nav>
+
+<script>
+/* ===================== DADOS DO ROTEIRO ===================== */
+const MYMAPS_ID = "1J7KBAxWIm3JYV8LtI5Qwr6SxfnyE-BU";
+
+const DAYS = [
+  {
+    id:"dia-1", n:"01", dow:"Quarta", date:"06 jan", short:"Qua 06", hood:"Centro",
+    title:"Centro + Puerto Madero", sub:"tour, livros, docas & pub",
+    blocks:[
+      {period:"Manhã · Centro histórico"},
+      {stop:{n:1, name:"Tour guiado pelo Centro", addr:"Centro histórico · Plaza de Mayo", time:"manhã", tags:["Tour guiado"],
+        q:"Plaza de Mayo, Buenos Aires",
+        text:"A melhor forma de entender a cidade: história, política e arquitetura contadas por um guia local.",
+        sights:["Plaza de Mayo","Casa Rosada","Cabildo","Catedral"],
+        tip:"reserve com antecedência e leve dinheiro em espécie para o guia."}},
+      {stop:{n:2, name:"Calle Florida", addr:"Rua de pedestres no centro", time:"manhã", free:true,
+        q:"Calle Florida, Buenos Aires",
+        text:"Calçadão clássico do centro, com lojas, artistas de rua e prédios antigos.",
+        tip:"troque dinheiro só em casas de câmbio oficiais e fique de olho nos pertences."}},
+      {stop:{n:3, name:"Shopping Galerías Pacífico", addr:"Calle Florida 753 · esq. Av. Córdoba", time:"manhã", free:true,
+        q:"Galerías Pacífico, Florida 753, Buenos Aires",
+        text:"Prédio histórico com cúpula central coberta por murais de artistas argentinos. Olhe para cima!",
+        tip:"a cúpula é o destaque: vá direto ao centro do shopping."}},
+      {note:{kind:"Observação", name:"Librería de Ávila · desde 1785", q:"Librería de Ávila, Adolfo Alsina 500, Buenos Aires",
+        text:"Livraria antiga na Adolfo Alsina 500. Fica a 2 quadras da Plaza de Mayo: dá para passar durante o tour pelo centro."}},
+      {period:"Tarde / Noite · Livros, docas & pub"},
+      {stop:{n:4, name:"Livraria El Ateneo Grand Splendid", addr:"Av. Santa Fe 1860", time:"tarde", free:true,
+        q:"El Ateneo Grand Splendid, Av. Santa Fe 1860, Buenos Aires",
+        text:"Antigo teatro de 1919 transformado em livraria: camarotes viraram cantinhos de leitura e o palco virou café.",
+        tip:"suba aos balcões superiores para a foto do teatro inteiro."}},
+      {stop:{n:5, name:"Puerto Madero + Reserva Ecológica", addr:"Antigas docas à beira do rio", time:"fim de tarde", free:true,
+        q:"Puente de la Mujer, Buenos Aires",
+        extra:{label:"Reserva", q:"Reserva Ecológica Costanera Sur, Buenos Aires"},
+        text:"Galpões de tijolo restaurados, prédios modernos e calçadão à beira d’água. Ao lado fica a Reserva Ecológica Costanera Sur, a maior área verde da cidade (350 ha), com trilhas e entrada gratuita.",
+        tip:"a Reserva fecha no fim da tarde e não abre às segundas nem em dias de chuva."}},
+      {stop:{n:6, name:"The Gibraltar", addr:"Perú 895 · San Telmo", time:"noite", tags:["Pub"],
+        q:"The Gibraltar, Perú 895, Buenos Aires",
+        text:"Pub de estilo britânico querido por viajantes, com cerveja, comida e sinuca. Fechamento perfeito do dia.",
+        tip:"costuma encher à noite: chegue cedo e volte de táxi ou app."}},
+      {note:{kind:"Observação · vinhos superbaratos", name:"Supermercado Angel", q:"Sarmiento 1158, Buenos Aires",
+        text:"Sarmiento 1158 · fica pertinho do Obelisco."}},
+    ],
+    food:[
+      {n:"A", name:"Green Eat", addr:"Florida 102 · Microcentro", meal:"Café da manhã", q:"Green Eat, Florida 102, Buenos Aires",
+        near:"Antes do tour: Plaza de Mayo (~2 quadras)",
+        text:"Rede de café e comida rápida e saudável, no comecinho da Calle Florida. Outra unidade no centro: Reconquista 690."},
+      {n:"B", name:"Campaso Parrilla", addr:"Bernardo de Irigoyen 82 · Montserrat", meal:"Possível almoço", q:"Campaso Parrilla, Bernardo de Irigoyen 82, Buenos Aires",
+        near:"Perto de: Tour do Centro · Plaza de Mayo (~10 min a pé)",
+        text:"Parrilla argentina com carnes na brasa, além de sanduíches, saladas e pizzas. Pertinho da Av. de Mayo e da 9 de Julio.",
+        facts:[["Tipo","Parrilla argentina"],["Preço","Pratos ~ARS 14 mil a 31 mil · menu executivo"]],
+        ig:"https://www.instagram.com/campasoparrilla/"},
+      {n:"C", name:"Santos Manjares", addr:"Paraguay 938 · Microcentro", meal:"Possível almoço", q:"Santos Manjares, Paraguay 938, Buenos Aires",
+        near:"Perto de: Calle Florida · Galerías Pacífico (~5 quadras)",
+        text:"Parrilla clássica argentina. O ojo de bife é o prato mais elogiado; também tem provoleta, bife de chorizo e milanesas.",
+        facts:[["Reserva","Não precisa reservar"],["Pagamento","Cartão, pesos, reais, dólares ou euros"]]},
+    ]
+  },
+  {
+    id:"dia-2", n:"02", dow:"Quinta", date:"07 jan", short:"Qui 07", hood:"Recoleta",
+    title:"Recoleta + Palermo Chico", sub:"praças, museus & tango",
+    blocks:[
+      {period:"Manhã · Praças & a flor"},
+      {stop:{n:1, name:"Plaza República de Chile", addr:"Av. del Libertador · Palermo Chico", time:"manhã", free:true,
+        q:"Plaza República de Chile, Buenos Aires",
+        text:"Praça arborizada na Av. del Libertador, com o monumento a Bernardo O’Higgins."}},
+      {stop:{n:2, name:"Plaza Rep. Oriental del Uruguay", addr:"Av. del Libertador · Recoleta", time:"manhã", free:true,
+        q:"Plaza República Oriental del Uruguay, Buenos Aires",
+        text:"Praça com o monumento ao General Artigas, figura de bronze inaugurada em 1973, com relevos que simbolizam a liberdade e a federação."}},
+      {stop:{n:3, name:"Floralis Genérica", addr:"Plaza de las Naciones Unidas · Av. Figueroa Alcorta", time:"manhã", free:true,
+        q:"Floralis Genérica, Buenos Aires",
+        text:"A gigantesca flor de aço inoxidável com mais de 20 metros de altura, cercada por um espelho d’água. Um dos cartões-postais da cidade."}},
+      {period:"Manhã · Direito & Belas Artes"},
+      {stop:{n:4, name:"Faculdade de Direito (UBA)", addr:"Av. Figueroa Alcorta 2263", time:"manhã", free:true,
+        q:"Facultad de Derecho UBA, Figueroa Alcorta 2263, Buenos Aires",
+        text:"O prédio neoclássico de colunas enormes. A melhor foto é de cima da passarela de pedestres sobre a Figueroa Alcorta.",
+        tip:"suba na passarela para a foto do prédio inteiro."}},
+      {stop:{n:5, name:"Plaza Juan XXIII", addr:"Recoleta", time:"manhã", free:true,
+        q:"Plaza Juan XXIII, Recoleta, Buenos Aires",
+        text:"Pausa verde no caminho entre a faculdade e o museu."}},
+      {stop:{n:6, name:"Museu Nacional de Belas Artes", addr:"Av. del Libertador 1473", time:"manhã", free:true,
+        q:"Museo Nacional de Bellas Artes, Av. del Libertador 1473, Buenos Aires",
+        text:"Acervo em três andares, com obras de nomes como Goya, Rembrandt, Van Gogh e Monet. Entrada gratuita.",
+        tip:"fecha às segundas-feiras."}},
+      {period:"Tarde / Noite · Palácio, pausa & tango"},
+      {stop:{n:7, name:"Museu Nacional de Arte Decorativo", addr:"Av. del Libertador 1902 · Palacio Errázuriz", time:"tarde", tags:["Museu"],
+        q:"Museo Nacional de Arte Decorativo, Av. del Libertador 1902, Buenos Aires",
+        text:"Um palácio de estilo francês na Av. del Libertador que abriga uma coleção de artes decorativas.",
+        tip:"confirme horário e valor de entrada antes de ir."}},
+      {stop:{n:8, name:"Ir para o Airbnb", addr:"Pausa para descansar e se arrumar", time:"descanso", tags:["Pausa"], rest:true,
+        text:"Hora de recarregar as energias antes da noite de tango."}},
+      {stop:{n:9, name:"Tango Porteño", addr:"Cerrito 570 · edifício Metro Goldwyn Mayer", time:"show", tags:["Show"],
+        q:"Tango Porteño, Cerrito 570, Buenos Aires",
+        text:"Show com 8 músicos e coreografia de Mora Godoy, com malambo e boleadoras. Há opção com jantar (entrada, prato principal e sobremesa).",
+        tip:"reserve com antecedência; o show é à noite."}},
+    ],
+    food:[
+      {n:"A", name:"Kentucky", addr:"Av. Santa Fe 2702 · Recoleta", meal:"Café da manhã", q:"Pizzería Kentucky, Av. Santa Fe 2702, Buenos Aires",
+        near:"Antes de começar: Plaza República de Chile (~1,5 km)",
+        text:"Pizzaria tradicional de Buenos Aires, “fuego desde 1942”, com combo de café da manhã.",
+        facts:[["Combo","Café + 2 medialunas · ARS 4.200"],["Quando","Combo válido pela manhã"]]},
+      {n:"B", name:"El Sanjuanino", addr:"Posadas 1515 · Recoleta", meal:"Possível almoço", q:"El Sanjuanino, Posadas 1515, Buenos Aires",
+        near:"Perto de: Belas Artes · Recoleta",
+        text:"Pequeno e famoso pelas empanadas caseiras, presente em quase todas as listas das melhores empanadas de Buenos Aires. Costuma estar sempre cheio."},
+    ]
+  },
+  {
+    id:"dia-3", n:"03", dow:"Sexta", date:"08 jan", short:"Sex 08", hood:"Tigre",
+    title:"Tigre + Bairro Chino", sub:"delta, mercado & pôr do sol", travel:"transit",
+    blocks:[
+      {period:"Manhã · Tarde · O Delta & o mercado"},
+      {stop:{n:1, name:"Passeio de barco pelo Delta", addr:"Estação Fluvial de Tigre", time:"manhã", tags:["Barco"],
+        q:"Estación Fluvial Tigre, Buenos Aires",
+        text:"O ponto alto de Tigre: navegar pelos canais do Delta, entre ilhas verdes e casinhas com píer na beira d’água."}},
+      {stop:{n:2, name:"Puerto de Frutos", addr:"Tigre", time:"tarde", free:true,
+        q:"Puerto de Frutos, Tigre, Buenos Aires",
+        text:"Mercado de artesanato e decoração à beira do rio, com cestaria, plantas e barraquinhas."}},
+      {transit:"Trem linha Mitre de Tigre até Belgrano C · ~40 min", icon:"train"},
+      {period:"Fim de tarde · Pôr do sol no Bairro Chino"},
+      {stop:{n:3, name:"Bairro Chino", addr:"Rua Arribeños · Belgrano · ao lado da estação Belgrano C", time:"pôr do sol", tags:["Fim do dia"],
+        q:"Barrio Chino, Arribeños, Belgrano, Buenos Aires",
+        text:"Fechamento do dia no Bairro Chino, com restaurantes, mercadinhos e lojinhas ao redor da rua Arribeños.",
+        tip:"muitas lojas fecham no começo da noite: confira o horário dos lugares que você quer ver."}},
+    ],
+    food:[]
+  },
+  {
+    id:"dia-5", n:"05", dow:"Domingo", date:"10 jan", short:"Dom 10", hood:"San Telmo",
+    title:"San Telmo + La Boca", sub:"feira, mercado, Caminito & Bombonera",
+    blocks:[
+      {period:"Manhã · San Telmo"},
+      {stop:{n:1, name:"Feira de San Telmo", addr:"Calle Defensa · Plaza Dorrego", time:"domingo", free:true,
+        q:"Plaza Dorrego, San Telmo, Buenos Aires",
+        text:"A famosa feira de domingo: barracas de antiguidades, artesanato e artistas de rua ao longo da Calle Defensa, com centro na Plaza Dorrego.",
+        tip:"acontece só aos domingos e fica bem cheia: cuidado com os pertences."}},
+      {stop:{n:2, name:"Mercado de San Telmo", addr:"Defensa · Carlos Calvo · Bolívar", time:"mercado", free:true,
+        q:"Mercado de San Telmo, Buenos Aires",
+        text:"Mercado histórico com estrutura de ferro do fim do século XIX, com bancas de comida, cafés, frutas e antiguidades. Bom lugar para uma pausa."}},
+      {transit:"Táxi ou app de San Telmo até La Boca", icon:"car"},
+      {period:"Tarde · La Boca"},
+      {stop:{n:3, name:"Caminito", addr:"La Boca", time:"tarde", free:true,
+        q:"Caminito, La Boca, Buenos Aires",
+        text:"A rua-museu de casas coloridas de chapa, com artistas, tango na calçada e o clima do porto antigo de La Boca.",
+        tip:"fique na área turística do Caminito e use táxi ou app para chegar e sair."}},
+      {stop:{n:4, name:"La Bombonera", addr:"Brandsen 805 · La Boca", time:"La Boca", tags:["Estádio"],
+        q:"La Bombonera, Brandsen 805, Buenos Aires",
+        text:"O estádio azul e amarelo do Boca Juniors. Ao lado fica o Museo de la Pasión Boquense, com visita ao estádio. Fica a poucas quadras a pé do Caminito.",
+        tip:"confirme no site do clube se há jogo ou evento no dia: a visita pode mudar."}},
+    ],
+    food:[]
+  }
+];
+
+/* ===================== HELPERS ===================== */
+const enc = s => encodeURIComponent(s);
+const gSearch = q => `https://www.google.com/maps/search/?api=1&query=${enc(q)}`;
+const gEmbedPlace = q => `https://maps.google.com/maps?q=${enc(q)}&z=16&hl=pt-BR&output=embed`;
+const stopsOf = d => d.blocks.filter(b => b.stop && b.stop.q).map(b => b.stop);
+function gEmbedRoute(d){
+  const s = stopsOf(d);
+  const saddr = enc(s[0].q);
+  const daddr = s.slice(1).map(x => enc(x.q)).join("+to:");
+  const flag = d.travel === "transit" ? "r" : "w";
+  return `https://maps.google.com/maps?saddr=${saddr}&daddr=${daddr}&dirflg=${flag}&hl=pt-BR&output=embed`;
+}
+function gDirections(d){
+  const s = stopsOf(d);
+  const p = new URLSearchParams({api:"1", origin:s[0].q, destination:s[s.length-1].q,
+    travelmode: d.travel === "transit" ? "transit" : "walking"});
+  if (s.length > 2) p.set("waypoints", s.slice(1,-1).map(x=>x.q).join("|"));
+  return "https://www.google.com/maps/dir/?" + p.toString();
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const ICON = {
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  train:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/><circle cx="9" cy="14" r=".5"/><circle cx="15" cy="14" r=".5"/></svg>',
+  car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16l1.5-5A2 2 0 0 1 8.4 9.5h7.2a2 2 0 0 1 1.9 1.5L19 16"/><rect x="3" y="16" width="18" height="4" rx="1"/><circle cx="7.5" cy="20" r="1"/><circle cx="16.5" cy="20" r="1"/></svg>',
+  ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>',
+};
+
+/* ---------- "Feito" / "Fui" salvos no aparelho ---------- */
+const KEY = "roteiro-ba-2027";
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { done = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
+const stopKey = (d, s) => `${d.id}:${s.n}`;
+const foodKey = (d, f) => `${d.id}:food:${f.n}`;
+function dayProgress(d){
+  const all = d.blocks.filter(b=>b.stop).map(b=>stopKey(d,b.stop));
+  return {done: all.filter(k=>done[k]).length, total: all.length};
+}
+
+/* ===================== RENDER ===================== */
+const app = document.getElementById("app");
+
+function renderTabs(active){
+  const items = [{id:"inicio", label:"Início", icon:ICON.home}]
+    .concat(DAYS.map(d => ({id:d.id, label:d.short, num:d.n})));
+  document.getElementById("tabs").innerHTML = items.map(it =>
+    `<li><a href="#${it.id}" ${it.id===active?'aria-current="page"':''}>${it.icon ? it.icon : `<b>${it.num}</b>`}<span>${esc(it.label)}</span></a></li>`
+  ).join("");
+}
+
+function renderHome(){
+  app.innerHTML = `
+  <header class="hero">
+    <svg class="sun" viewBox="0 0 200 200" aria-hidden="true">
+      <g fill="#F2A900">
+        ${Array.from({length:32},(_,i)=>{const a=i*11.25; return `<path transform="rotate(${a} 100 100)" d="${i%2?'M100 100 L96 18 Q100 30 104 18 Z':'M100 100 L97 14 L103 14 Z'}"/>`}).join("")}
+        <circle cx="100" cy="100" r="34"/>
+      </g>
+    </svg>
+    <div class="wrap">
+      <div class="eyebrow">Roteiro de viagem · 06 a 14 de janeiro de 2027</div>
+      <h1>Buenos<br><em>Aires</em></h1>
+      <p>Centro · Recoleta · Tigre · San Telmo. Toque num dia para ver o mapa e os lugares.</p>
+    </div>
+  </header>
+  <div class="stripe" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="daylist">
+      ${DAYS.map(d => { const p = dayProgress(d); return `
+      <a class="daylink" href="#${d.id}">
+        <span class="num">${d.n}</span>
+        <span><b>${esc(d.title)}</b><small>${d.dow}, ${d.date} · ${esc(d.sub)}</small></span>
+        <span class="prog ${p.done===p.total?'done':''}">${p.done}/${p.total}</span>
+      </a>`}).join("")}
+    </div>
+
+    <h2 class="sec-title">Meu mapa da viagem</h2>
+    <p class="sec-sub">Todos os destinos no Google Maps. Use dois dedos para mover o mapa.</p>
+    <div class="mapbox big">
+      <div class="ph">Carregando mapa…</div>
+      <iframe title="Mapa com todos os destinos" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps/d/embed?mid=${MYMAPS_ID}&hl=pt-BR"></iframe>
+    </div>
+    <div class="mapbar">
+      <a class="btn primary" href="https://www.google.com/maps/d/viewer?mid=${MYMAPS_ID}" target="_blank" rel="noopener">${ICON.ext} Abrir no app Google Maps</a>
+    </div>
+    <p class="foot">Marque “Feito” em cada lugar: o progresso fica salvo neste celular.</p>
+  </div>`;
+}
+
+function stopCard(d, s){
+  const k = stopKey(d, s), isDone = !!done[k];
+  const tags = [
+    s.free ? '<span class="tag free">Grátis</span>' : "",
+    ...(s.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`),
+    `<span class="tag time">${esc(s.time)}</span>`
+  ].join("");
+  return `
+  <article class="card ${isDone?'isdone':''}" id="${d.id}-p${s.n}" data-q="${s.q?esc(s.q):''}">
+    <button class="pin ${s.rest?'rest':''}" ${s.q?`data-show="${s.n}" aria-label="Mostrar ${esc(s.name)} no mapa"`:'disabled aria-hidden="true" tabindex="-1"'}><span>${s.n}</span></button>
+    <div class="body">
+      <h3>${esc(s.name)}</h3>
+      <div class="addr">${esc(s.addr)}</div>
+      <div class="meta">${tags}</div>
+      <p>${esc(s.text)}</p>
+      ${s.sights?`<div class="sights">${s.sights.map(x=>`<span>${esc(x)}</span>`).join("")}</div>`:""}
+      ${s.tip?`<div class="tip"><b>Dica:</b> ${esc(s.tip)}</div>`:""}
+      <div class="actions">
+        ${s.q?`<button class="btn" data-show="${s.n}">${ICON.map} Ver no mapa</button>
+        <a class="btn" href="${gSearch(s.q)}" target="_blank" rel="noopener">${ICON.pin} Abrir no Maps</a>`:""}
+        ${s.extra?`<a class="btn" href="${gSearch(s.extra.q)}" target="_blank" rel="noopener">${ICON.pin} ${esc(s.extra.label)}</a>`:""}
+        <button class="btn done-btn" data-done="${k}" aria-pressed="${isDone}">${ICON.check} ${isDone?'Feito':'Marcar feito'}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function foodCard(d, f){
+  const k = foodKey(d, f), isDone = !!done[k];
+  return `
+  <article class="card ${isDone?'isdone':''}" id="${d.id}-f${f.n}" data-q="${esc(f.q)}">
+    <button class="pin food" data-showq="${esc(f.q)}" data-label="${esc(f.name)}" aria-label="Mostrar ${esc(f.name)} no mapa"><span>${f.n}</span></button>
+    <div class="body">
+      <h3>${esc(f.name)}</h3>
+      <div class="addr">${esc(f.addr)}</div>
+      <div class="meta"><span class="tag meal">${esc(f.meal)}</span></div>
+      <div class="near">${esc(f.near)}</div>
+      <p>${esc(f.text)}</p>
+      ${f.facts?`<div class="facts">${f.facts.map(([a,b])=>`<div><small>${esc(a)}</small>${esc(b)}</div>`).join("")}</div>`:""}
+      <div class="actions">
+        <button class="btn" data-showq="${esc(f.q)}" data-label="${esc(f.name)}">${ICON.map} Ver no mapa</button>
+        <a class="btn" href="${gSearch(f.q)}" target="_blank" rel="noopener">${ICON.pin} Abrir no Maps</a>
+        ${f.ig?`<a class="btn" href="${f.ig}" target="_blank" rel="noopener">${ICON.ig} Instagram</a>`:""}
+        <button class="btn done-btn" data-done="${k}" data-food="1" aria-pressed="${isDone}">${ICON.check} ${isDone?'Fui':'Marcar fui'}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderDay(d){
+  const p = dayProgress(d);
+  const idx = DAYS.indexOf(d);
+  const prev = DAYS[idx-1], next = DAYS[idx+1];
+  const stops = stopsOf(d);
+  app.innerHTML = `
+  <header class="dayhead"><div class="wrap">
+    <div class="eyebrow">Dia ${d.n} · ${d.dow}, ${d.date}</div>
+    <h2>${esc(d.title)}</h2>
+    <p>${esc(d.sub)}</p>
+    <div class="progress" aria-hidden="true"><i id="pbar" style="width:${p.total?100*p.done/p.total:0}%"></i></div>
+    <div class="progtxt" id="ptxt">${p.done} de ${p.total} feitos</div>
+  </div></header>
+
+  <div class="daymap"><div class="wrap">
+    <div class="maplabel" id="mlabel">Rota do dia · ${stops.length} paradas</div>
+    <div class="mapbox">
+      <div class="ph">Carregando mapa…</div>
+      <iframe id="dmap" title="Mapa do dia" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="${gEmbedRoute(d)}"></iframe>
+    </div>
+    <div class="mapbar">
+      <button class="btn" id="showroute">${ICON.route} Rota do dia</button>
+      <a class="btn primary" href="${gDirections(d)}" target="_blank" rel="noopener">${ICON.ext} Navegar no Google Maps</a>
+    </div>
+  </div></div>
+
+  <div class="wrap">
+    <div class="chips" role="group" aria-label="Paradas do dia">
+      ${stops.map(s=>`<button class="chip" data-show="${s.n}" aria-pressed="false">${s.n} · ${esc(s.name)}</button>`).join("")}
+    </div>
+    <div class="stops">
+    ${d.blocks.map(b => {
+      if (b.period) return `<div class="period">${esc(b.period)}</div>`;
+      if (b.stop) return stopCard(d, b.stop);
+      if (b.transit) return `<div class="transit">${ICON[b.icon]||ICON.route}<span>${esc(b.transit)}</span></div>`;
+      if (b.note) return `<aside class="note">
+        <div class="eyebrow">${esc(b.note.kind)}</div><h3>${esc(b.note.name)}</h3><p>${esc(b.note.text)}</p>
+        <div class="actions"><button class="btn" data-showq="${esc(b.note.q)}" data-label="${esc(b.note.name)}">${ICON.map} Ver no mapa</button>
+        <a class="btn" href="${gSearch(b.note.q)}" target="_blank" rel="noopener">${ICON.pin} Abrir no Maps</a></div></aside>`;
+      return "";
+    }).join("")}
+    </div>
+
+    <h2 class="sec-title" id="${d.id}-comer">Onde comer por perto</h2>
+    <p class="sec-sub">Possíveis lugares para o dia.</p>
+    <div class="stops">
+      ${d.food.length ? d.food.map(f=>foodCard(d,f)).join("") : `<div class="empty">Ainda sem lugares definidos para este dia.</div>`}
+    </div>
+
+    <div class="daynext">
+      ${prev?`<a class="btn" href="#${prev.id}">← Dia ${prev.n}</a>`:`<a class="btn" href="#inicio">← Início</a>`}
+      ${next?`<a class="btn primary" href="#${next.id}">Dia ${next.n} →</a>`:`<a class="btn" href="#inicio">↑ Início</a>`}
+    </div>
+    <p class="foot">Dia ${d.n} · ${esc(d.title)}</p>
+  </div>`;
+}
+
+/* ===================== INTERAÇÃO ===================== */
+let currentDay = null;
+function setMap(src, label, cardId){
+  const f = document.getElementById("dmap"); if (!f) return;
+  if (f.getAttribute("src") !== src) f.setAttribute("src", src);
+  document.getElementById("mlabel").textContent = label;
+  document.querySelectorAll(".card.active").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", "false"));
+  if (cardId){ const c = document.getElementById(cardId); if (c) c.classList.add("active"); }
+}
+app.addEventListener("click", e => {
+  const show = e.target.closest("[data-show]");
+  const showq = e.target.closest("[data-showq]");
+  const doneBtn = e.target.closest("[data-done]");
+  if (show && currentDay){
+    const n = +show.dataset.show;
+    const s = stopsOf(currentDay).find(x=>x.n===n);
+    setMap(gEmbedPlace(s.q), `${s.n} · ${s.name}`, `${currentDay.id}-p${n}`);
+    document.querySelectorAll(`.chip[data-show="${n}"]`).forEach(c=>{c.setAttribute("aria-pressed","true"); c.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});});
+    if (show.classList.contains("chip")) document.getElementById(`${currentDay.id}-p${n}`).scrollIntoView({behavior:"smooth", block:"start"});
+  } else if (showq){
+    const card = showq.closest(".card");
+    setMap(gEmbedPlace(showq.dataset.showq), showq.dataset.label, card ? card.id : null);
+  } else if (doneBtn){
+    const k = doneBtn.dataset.done;
+    done[k] = !done[k]; if (!done[k]) delete done[k]; save();
+    const on = !!done[k], food = doneBtn.dataset.food;
+    doneBtn.setAttribute("aria-pressed", on);
+    doneBtn.innerHTML = `${ICON.check} ${on ? (food?'Fui':'Feito') : (food?'Marcar fui':'Marcar feito')}`;
+    doneBtn.closest(".card").classList.toggle("isdone", on);
+    const p = dayProgress(currentDay);
+    document.getElementById("pbar").style.width = (100*p.done/p.total) + "%";
+    document.getElementById("ptxt").textContent = `${p.done} de ${p.total} feitos`;
+  } else if (e.target.closest("#showroute") && currentDay){
+    setMap(gEmbedRoute(currentDay), `Rota do dia · ${stopsOf(currentDay).length} paradas`, null);
+  }
+});
+
+function route(){
+  const id = location.hash.replace("#","");
+  const d = DAYS.find(x=>x.id===id);
+  currentDay = d || null;
+  if (d) renderDay(d); else renderHome();
+  renderTabs(d ? d.id : "inicio");
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
